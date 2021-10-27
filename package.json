@@ -6,7 +6,8 @@
   "module": "dist/index.mjs",
   "typings": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "test": "exit 0",
