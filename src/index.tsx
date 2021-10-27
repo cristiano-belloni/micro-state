@@ -95,7 +95,7 @@ export function StateClientProvider({ client, children }: StateClientParams) {
   );
 }
 
-export function useSyncState<T>(
+export function useMicroState<T>(
   key: string | string[],
   initialValue: T
 ): [T, MutatorFunction<T>] {
