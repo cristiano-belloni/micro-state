@@ -1,0 +1,41 @@
+{
+  "name": "micro-state",
+  "version": "0.0.1",
+  "description": "Tiny, global, efficient, hook-based state management for React",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run clean && rollup -w",
+    "build": "eslint src/** && rollup -c",
+    "clean": "rimraf ./dist"
+  },
+  "keywords": [
+    "store",
+    "state",
+    "micro",
+    "react",
+    "hooks"
+  ],
+  "peerDependencies": {
+    "react": ">16.8.0"
+  },
+  "devDependencies": {
+    "@types/react": ">16.8.0",
+    "@typescript-eslint/eslint-plugin": "^5.2.0",
+    "@typescript-eslint/parser": "^5.2.0",
+    "esbuild": "^0.13.9",
+    "eslint": "^8.1.0",
+    "eslint-plugin-react": "^7.26.1",
+    "prettier": "2.4.1",
+    "react": ">16.8.0",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.58.3",
+    "rollup-plugin-dts": "^4.0.0",
+    "rollup-plugin-esbuild": "^4.6.0",
+    "typescript": "^4.4.4"
+  },
+  "author": "Cristiano Belloni <cristiano@hya.io>",
+  "license": "MIT"
+}
