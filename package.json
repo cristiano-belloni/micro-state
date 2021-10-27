@@ -9,7 +9,7 @@
     "dist"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "exit 0",
     "start": "npm run clean && rollup -cw",
     "build": "eslint src/** && rollup -c",
     "publish": "npm run build && np",
