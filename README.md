@@ -2,7 +2,7 @@
 
 ## What
 
-A really (856 byte gzipped) tiny state manager for React with hooks.
+A really tiny (750 bytes brotli) state manager for React with hooks.
 Key-value based, global and performant (only refreshes a component if needed).
 
 ## Why
