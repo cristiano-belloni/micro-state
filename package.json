@@ -5,6 +5,10 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "typings": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cristiano-belloni/micro-state"
+  },
   "files": [
     "dist",
     "README.md",
@@ -13,7 +17,7 @@
   "scripts": {
     "test": "exit 0",
     "start": "npm run clean && rollup -cw",
-    "build": "eslint src/** && rollup -c",
+    "build": "npm run clean && eslint src/** && rollup -c",
     "publish": "npm run build && np",
     "clean": "rimraf ./dist"
   },

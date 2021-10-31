@@ -10,7 +10,7 @@ type Reducer<T> = (t: T) => T;
 type Mutator<T> = T | Reducer<T>;
 type MutatorFunction<T> = (t: Mutator<T>) => void;
 type ObserverCallback = () => void;
-type Key = string | string[];
+type Key = string | (string | number)[];
 
 const StateContext = createContext<StateClient | undefined>(undefined);
 
@@ -72,7 +72,7 @@ export class StateClient {
   };
 
   // Get the value for a key
-  get = <T,>(providedKey: Key) => {
+  get = <T,>(providedKey: Key): T => {
     const key = StateClient.serializeKey(providedKey);
     return this.state[key] as T;
   };
@@ -96,7 +96,7 @@ export function StateClientProvider({ client, children }: StateClientParams) {
 }
 
 export function useMicroState<T>(
-  key: string | string[],
+  key: Key,
   initialValue: T
 ): [T, MutatorFunction<T>] {
   const stateClient = useContext(StateContext);
@@ -128,4 +128,9 @@ export function useMicroState<T>(
   }
 
   return [stateClient.get(key) as T, mutatorCallback];
+}
+
+export function useMicroStateClient(): StateClient {
+  const stateClient = useContext(StateContext);
+  return stateClient;
 }
