@@ -21,6 +21,12 @@ Because [when context dispatches, it re-renders all the components that are subs
 
 ## How
 
+### To install
+
+`npm i --save @hya/micro-state`
+
+### To use
+
 ```jsx
 import {
   useMicroState,
@@ -31,7 +37,7 @@ import {
 const client = new StateClient();
 
 /* 
-  External subscription to a key.
+  External subscription to a key. This is completely optional.
   Keys can be externally set with .set (will trigger refresh)
   get with .get and checked for existence with .has 
 */
