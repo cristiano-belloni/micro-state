@@ -80,7 +80,7 @@ export class StateClient {
   // Get true if the value was set or initialized before, false otherwise
   has = (providedKey: Key) => {
     const key = StateClient.serializeKey(providedKey);
-    return Object.prototype.hasOwnProperty.call(this.state, key);
+    return key in this.state;
   };
 }
 
