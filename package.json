@@ -15,7 +15,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "exit 0",
+    "test": "jest",
     "start": "npm run clean && rollup -cw",
     "build": "npm run clean && eslint src/** && rollup -c",
     "publish": "npm run build && np",
@@ -32,12 +32,14 @@
     "react": ">16.8.0"
   },
   "devDependencies": {
+    "@types/jest": "^27.0.3",
     "@types/react": ">16.8.0",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
     "@typescript-eslint/parser": "^5.2.0",
-    "esbuild": "^0.13.9",
+    "esbuild": "^0.14.0",
     "eslint": "^8.1.0",
     "eslint-plugin-react": "^7.26.1",
+    "jest": "^27.4.5",
     "np": "^7.5.0",
     "prettier": "2.4.1",
     "react": ">16.8.0",
@@ -45,7 +47,8 @@
     "rollup": "^2.58.3",
     "rollup-plugin-dts": "^4.0.0",
     "rollup-plugin-esbuild": "^4.6.0",
-    "typescript": "^4.4.4"
+    "ts-jest": "^27.1.2",
+    "typescript": "^4.5.4"
   },
   "author": "Cristiano Belloni <cristiano@hya.io>",
   "license": "MIT"

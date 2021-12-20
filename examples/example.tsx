@@ -1,7 +1,7 @@
 import React from "react";
-import { useMicroState, StateClient, StateClientProvider } from "../src/index";
+import { createMicroState } from "../src/index";
 
-const client = new StateClient();
+const { useMicroState, ...microState } = createMicroState();
 
 /* 
   External subscription to a key.
@@ -9,19 +9,11 @@ const client = new StateClient();
   get with .get and checked for existence with .has 
 */
 
-client.subscribe(["counter", 0], () =>
-  console.log(client.has(["counter", 0]), client.get(["counter", 0]))
+microState.subscribe(["counter", 0], () =>
+  console.log(microState.has(["counter", 0]), microState.get(["counter", 0]))
 );
 
 function App() {
-  return (
-    <StateClientProvider client={client}>
-      <CounterApp />
-    </StateClientProvider>
-  );
-}
-
-function CounterApp() {
   /* 
     useMicroState can work at any level below a Provider
     keys can be either arrays or string, but beware: ["my", "key"] is equivalent to "my.key"
