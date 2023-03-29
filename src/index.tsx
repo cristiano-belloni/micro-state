@@ -2,8 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
-  useState,
-  useEffect,
+  useSyncExternalStore,
 } from "react";
 
 type Reducer<T> = (t: T) => T;
@@ -17,16 +16,18 @@ const StateContext = createContext<StateClient | undefined>(undefined);
 export class StateClient {
   private state: Record<string, unknown> = {};
   private observers: Record<string, Set<ObserverCallback>> = {};
+  private currentFakeRef = {}; // See https://jsperf.app/qobefi
 
-  private static serializeKey(key: Key) {
+  public static serializeKey(key: Key) {
     return Array.isArray(key) ? key.join(".") : key;
   }
 
   // Subscribe to the providedKey, call the updateFunction if it changes (with no arguments)
   subscribe = (providedKey: Key, updateFunction: ObserverCallback) => {
+    console.debug("Subscribing to key", providedKey);
     const key = StateClient.serializeKey(providedKey);
     if (!this.observers[key]) {
-      this.observers[key] = new Set<ObserverCallback>(); // WeakSet would be better, but they can't be iterated upon
+      this.observers[key] = new Set<ObserverCallback>();
     }
     this.observers[key].add(updateFunction);
   };
@@ -36,6 +37,7 @@ export class StateClient {
     providedKey: Key | undefined,
     updateFunction: ObserverCallback
   ) => {
+    console.debug("Unsubscribing from key", providedKey);
     if (!providedKey) return;
     const key = StateClient.serializeKey(providedKey);
     if (!this.observers[key]) {
@@ -45,16 +47,17 @@ export class StateClient {
     this.observers[key].delete(updateFunction);
   };
 
-  // set a key to a value or use a reducer to set the value, and trigger all the subscriptions
+  // Set a key to a value or use a reducer to set the value, and trigger all the subscriptions
   set = (providedKey: Key, mutator: Mutator<unknown>) => {
     const key = StateClient.serializeKey(providedKey);
 
-    // Update state
-    if (typeof mutator === "function") {
-      this.state[key] = mutator(this.state[key]);
-    } else {
-      this.state[key] = mutator;
-    }
+    // Update state. This needs to be immutable because of how useSyncExternalStore works.
+    const value =
+      typeof mutator === "function" ? mutator(this.state[key]) : mutator;
+    // This is faster than this.state = { ...this.state, [key]: value };
+    // See https://jsperf.app/qobefi
+    this.state[key] = value;
+    this.currentFakeRef = {};
 
     // Call all the observers
     if (this.observers[key]) {
@@ -82,6 +85,11 @@ export class StateClient {
     const key = StateClient.serializeKey(providedKey);
     return Object.prototype.hasOwnProperty.call(this.state, key);
   };
+
+  // Get the current state. This is mainly used in useSyncExternalStore
+  getUpdateReference = () => {
+    return this.currentFakeRef;
+  };
 }
 
 interface StateClientParams {
@@ -96,32 +104,37 @@ export function StateClientProvider({ client, children }: StateClientParams) {
 }
 
 export function useMicroState<T>(
-  key: Key,
+  providedKey: Key,
   initialValue: T
 ): [T, MutatorFunction<T>] {
   const stateClient = useContext(StateContext);
+  // We need to serialize the key here because it's used as a dependency in the callback for useSyncExternalStore
+  // If it's an array, it will re-create the function every time the array gets re-created
+  const key = StateClient.serializeKey(providedKey);
 
   if (!stateClient) {
     throw new Error("No StateClientProvider specified");
   }
 
-  const { subscribe, unsubscribe } = stateClient;
+  const { subscribe, unsubscribe, getUpdateReference } = stateClient;
 
-  // DIY forceRefresh
-  const stateSetter = useState({})[1];
-  // This function identifies the hook "instance", as its ref is unique to this hook's lifecycle
-  const updateFunction = useCallback(() => stateSetter({}), [stateSetter]);
-  // Mutator callback: memoizes the key until it changes, so we don't recreate a function every time
+  // This subscribes to the state and returns a cleanup function
+  // It needs to be a callback because it's used in useSyncExternalStore
+  const subscriber = useCallback(
+    (callback: ObserverCallback) => {
+      subscribe(key, callback);
+      return () => unsubscribe(key, callback);
+    },
+    [key, subscribe, unsubscribe]
+  );
+
+  // This re-renders the component when the state changes
+  useSyncExternalStore(subscriber, getUpdateReference);
+
   const mutatorCallback = useCallback<MutatorFunction<T>>(
     (mutator: Mutator<T>) => stateClient.set(key, mutator),
     [key, stateClient]
   );
-
-  useEffect(() => {
-    // Subscribe to the new key and unsubscribe from the old
-    subscribe(key, updateFunction);
-    return () => unsubscribe(key, updateFunction);
-  }, [key, updateFunction, subscribe, unsubscribe]);
 
   if (!stateClient.has(key)) {
     stateClient.initialize(key, initialValue);
